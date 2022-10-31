@@ -3,6 +3,10 @@ package maps.s354378_mappe3;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,8 +18,14 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.internal.ILocationSourceDelegate;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 import maps.s354378_mappe3.databinding.ActivityMapsBinding;
 
@@ -71,8 +81,28 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     @Override
     public void onMapLongClick(@NonNull LatLng latLng) {
         String output = "Long-pressed location: "+latLng;
-        textView.setText(output);
-        Toast.makeText(this, "Long-pressed on "+latLng+"!", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Long-pressed on "+latLng+"!", Toast.LENGTH_SHORT).show();
+
+        Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
+        try {
+            System.out.println("Death in 3..2..1");
+            List<Address> res = coder.getFromLocation(latLng.latitude, latLng.longitude, 1);
+            if(!res.isEmpty()) output += "\nCurrent address is: "+res.get(0).getAddressLine(0);
+            else output+= "\nIngen res";
+            textView.setText(output);
+        } catch (Exception e) {
+            System.out.println("Dont print this :-)");
+        }
+        //textView.setText(output);
+
+
+        //Check if location is an actual address
+
+        //Display button to save location as new attraction
+
+        //Create new attraction (address, pos, description) string, LatLng, String
+
+        //Send object to database
     }
 
     @Override
