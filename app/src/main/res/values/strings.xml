@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">s354378_mappe3</string>
     <string name="title_activity_maps">MapsActivity</string>
+    <string name="dialog_content">Do you want to register an attraction?</string>
+    <string name="dialog_accept">Yes</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

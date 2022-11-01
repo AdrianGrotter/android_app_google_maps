@@ -2,7 +2,10 @@ package maps.s354378_mappe3;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -26,7 +29,7 @@ import java.util.Locale;
 import maps.s354378_mappe3.databinding.ActivityMapsBinding;
 
 public class MapsActivity extends FragmentActivity implements OnMapClickListener, OnMapLongClickListener, OnCameraIdleListener,
-        OnMapReadyCallback{
+        OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
@@ -75,16 +78,17 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraIdleListener(this);
+        mMap.setOnMarkerClickListener(this);
+        mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
     }
 
     @Override
     public void onMapLongClick(@NonNull LatLng latLng){
         String output = "Long-pressed location: "+latLng;
-        //Toast.makeText(this, "Long-pressed on "+latLng+"!", Toast.LENGTH_SHORT).show();
 
         Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
-            System.out.println("Death in 3..2..1");
             List<Address> res = coder.getFromLocation(latLng.latitude, latLng.longitude, 1);
             if(!res.isEmpty()) output += "\nCurrent address is: "+res.get(0).getAddressLine(0);
             else output+= "\nIngen res";
@@ -92,8 +96,9 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
             m.remove();
             m  = mMap.addMarker(new MarkerOptions().position(latLng).title("Your new marker"));
         } catch (Exception e) {
-            System.out.println("Dont print this :-)");
+            System.out.println(e.getCause());
         }
+
         //textView.setText(output);
 
 
@@ -114,5 +119,28 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     @Override
     public void onCameraIdle() {
 
+    }
+
+    @Override
+    public boolean onMarkerClick(@NonNull Marker marker) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(R.string.dialog_content).setTitle("MyTitle");
+        builder.setPositiveButton(R.string.dialog_accept, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MapsActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
+            }
+        });
+        builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MapsActivity.this, "Cancelled", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        return false;
     }
 }
