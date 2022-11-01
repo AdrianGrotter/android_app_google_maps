@@ -23,7 +23,14 @@ public class CreateAttractionActivity extends AppCompatActivity {
         Toast.makeText(this, "Pos: "+myLatLng, Toast.LENGTH_SHORT).show();
 
         Button btnReturn = (Button) findViewById(R.id.btnReturn);
+        Button btnSubmit = (Button)findViewById(R.id.btnReturn);
         btnReturn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                activityMain();
+            }
+        });
+        btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 activityMain();

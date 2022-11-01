@@ -4,4 +4,8 @@
     <string name="dialog_content">Do you want to register an attraction?</string>
     <string name="dialog_accept">Yes</string>
     <string name="dialog_cancel">Cancel</string>
+
+    <string name="title">Register a new attraction</string>
+    <string name="label_name">Name</string>
+    <string name="label_description">Description</string>
 </resources>
