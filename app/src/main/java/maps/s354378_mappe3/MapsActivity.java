@@ -4,8 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Bundle;
@@ -25,6 +28,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.logging.SocketHandler;
 
 import maps.s354378_mappe3.databinding.ActivityMapsBinding;
 
@@ -36,10 +40,14 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     TextView textView;
     MarkerOptions myMarker;
     Marker m;
+    LatLng latLng_global;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
+        latLng_global = new LatLng(Double.longBitsToDouble(sp.getLong("lat", 0)),
+                Double.longBitsToDouble(sp.getLong("long", 0)));
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -49,6 +57,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        System.out.println("This was run. "+latLng_global);
+
     }
 
     @Override
@@ -71,10 +81,16 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         mMap = googleMap;
 
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        myMarker = new MarkerOptions().position(sydney).title("Marker in Sydney");
+        if(latLng_global != null){
+            myMarker = new MarkerOptions().position(latLng_global).title("Marker in Sydneyz");
+        }else{
+            LatLng sydney = new LatLng(-34, 151);
+            myMarker = new MarkerOptions().position(sydney).title("Marker in Sydney");
+            latLng_global = sydney;
+        }
+
         m = mMap.addMarker(myMarker);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng_global));
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraIdleListener(this);
@@ -86,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     @Override
     public void onMapLongClick(@NonNull LatLng latLng){
         String output = "Long-pressed location: "+latLng;
+        latLng_global = latLng;
 
         Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
@@ -128,7 +145,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         builder.setPositiveButton(R.string.dialog_accept, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MapsActivity.this, "Accepted", Toast.LENGTH_SHORT).show();
+                activityCreateAttraction();
+
             }
         });
         builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
@@ -142,5 +160,15 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         AlertDialog dialog = builder.create();
         dialog.show();
         return false;
+    }
+
+    private void activityCreateAttraction() {
+        Intent myIntent = new Intent(this, CreateAttractionActivity.class);
+        SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
+        SharedPreferences.Editor e = sp.edit();
+        e.putLong("lat", Double.doubleToRawLongBits(latLng_global.latitude));
+        e.putLong("long", Double.doubleToRawLongBits(latLng_global.longitude));
+        e.apply();
+        startActivity(myIntent);
     }
 }
