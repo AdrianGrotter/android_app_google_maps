@@ -5,8 +5,6 @@ import androidx.fragment.app.FragmentActivity;
 
 import android.location.Address;
 import android.location.Geocoder;
-import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,12 +16,10 @@ import com.google.android.gms.maps.GoogleMap.OnMapClickListener;
 import com.google.android.gms.maps.GoogleMap.OnMapLongClickListener;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.internal.ILocationSourceDelegate;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,6 +31,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
     TextView textView;
+    MarkerOptions myMarker;
+    Marker m;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +69,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        myMarker = new MarkerOptions().position(sydney).title("Marker in Sydney");
+        m = mMap.addMarker(myMarker);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
@@ -79,7 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     }
 
     @Override
-    public void onMapLongClick(@NonNull LatLng latLng) {
+    public void onMapLongClick(@NonNull LatLng latLng){
         String output = "Long-pressed location: "+latLng;
         //Toast.makeText(this, "Long-pressed on "+latLng+"!", Toast.LENGTH_SHORT).show();
 
@@ -90,6 +89,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
             if(!res.isEmpty()) output += "\nCurrent address is: "+res.get(0).getAddressLine(0);
             else output+= "\nIngen res";
             textView.setText(output);
+            m.remove();
+            m  = mMap.addMarker(new MarkerOptions().position(latLng).title("Your new marker"));
         } catch (Exception e) {
             System.out.println("Dont print this :-)");
         }
