@@ -26,9 +26,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.logging.SocketHandler;
 
 import maps.s354378_mappe3.databinding.ActivityMapsBinding;
 
@@ -41,10 +41,35 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     MarkerOptions myMarker;
     Marker m;
     LatLng latLng_global;
+    List<Attraction> myList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        myList = new ArrayList<Attraction>();
+
+        Attraction myAttraction = new Attraction();
+        myAttraction.setName("Soldier of the golden tides");
+        myAttraction.setDescription("Brass statue showing a soldier in combat");
+        myAttraction.setAddress("Statueveien 15C");
+        myAttraction.setPos(new LatLng(5,5));
+        myList.add(myAttraction);
+
+        Attraction myAttraction2 = new Attraction();
+        myAttraction2.setName("Noble steed");
+        myAttraction2.setDescription("Majestic steed carrying its master into battle");
+        myAttraction2.setAddress("Ole Henders alle 11");
+        myAttraction2.setPos(new LatLng(-20,110));
+        myList.add(myAttraction2);
+
+        Attraction myAttraction3 = new Attraction();
+        myAttraction3.setName("Coral Reef");
+        myAttraction3.setDescription("Artwork on display");
+        myAttraction3.setAddress("Tollbugaten 2");
+        myAttraction3.setPos(new LatLng(-50,110));
+        myList.add(myAttraction3);
+
         SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
         latLng_global = new LatLng(Double.longBitsToDouble(sp.getLong("lat", 0)),
                 Double.longBitsToDouble(sp.getLong("long", 0)));
@@ -82,7 +107,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
         // Add a marker in Sydney and move the camera
         if(latLng_global != null){
-            myMarker = new MarkerOptions().position(latLng_global).title("Marker in Sydneyz");
+            myMarker = new MarkerOptions().position(latLng_global).title("Recreated marker");
         }else{
             LatLng sydney = new LatLng(-34, 151);
             myMarker = new MarkerOptions().position(sydney).title("Marker in Sydney");
@@ -96,6 +121,11 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         mMap.setOnCameraIdleListener(this);
         mMap.setOnMarkerClickListener(this);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+
+        for(Attraction a : myList){
+            myMarker = new MarkerOptions().position(a.pos).title(a.name);
+            mMap.addMarker(myMarker);
+        }
 
     }
 
@@ -117,7 +147,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         }
 
         //textView.setText(output);
-
 
         //Check if location is an actual address
 
@@ -146,7 +175,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 activityCreateAttraction();
-
             }
         });
         builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
