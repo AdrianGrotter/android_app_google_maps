@@ -5,18 +5,24 @@ import com.google.android.gms.maps.model.LatLng;
 public class Attraction {
      int _id;
      String address;
+     String name;
      LatLng pos;
      String description;
 
-     public Attraction(String address, LatLng pos, String description) {
+     public Attraction() {
+     }
+
+     public Attraction(String address, String name, LatLng pos, String description) {
           this.address = address;
+          this.name = name;
           this.pos = pos;
           this.description = description;
      }
 
-     public Attraction(int _id, String address, LatLng pos, String description) {
+     public Attraction(int _id, String address, String name, LatLng pos, String description) {
           this._id = _id;
           this.address = address;
+          this.name = name;
           this.pos = pos;
           this.description = description;
      }
@@ -35,6 +41,14 @@ public class Attraction {
 
      public void setAddress(String address) {
           this.address = address;
+     }
+
+     public String getName() {
+          return name;
+     }
+
+     public void setName(String name) {
+          this.name = name;
      }
 
      public LatLng getPos() {
