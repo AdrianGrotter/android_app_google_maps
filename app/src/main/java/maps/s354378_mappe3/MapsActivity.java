@@ -240,10 +240,10 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                     try {
                         JSONArray mat = new JSONArray(output);
                         for (int i = 0; i < mat.length(); i++) {
-                            JSONObject jsonobject = mat.getJSONObject(i);
-                            String name = jsonobject.getString("name");
-                            String description = jsonobject.getString("description");
-                            String pos = jsonobject.getString("latlng");
+                            jsonObject = mat.getJSONObject(i);
+                            String name = jsonObject.getString("name");
+                            String description = jsonObject.getString("description");
+                            String pos = jsonObject.getString("latlng");
                             retur = retur + name + "\n"+description+"\n"+pos;
                         }
                         return retur;

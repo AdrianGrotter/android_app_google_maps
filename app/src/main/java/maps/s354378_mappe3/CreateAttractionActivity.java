@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,7 +14,17 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataOutput;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -53,7 +64,14 @@ public class CreateAttractionActivity extends AppCompatActivity {
                 a.name = name.getText().toString();
                 a.pos = myLatLng;
                 Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
-                try {
+
+                sendJSON task = new sendJSON();
+                String latlng = a.getPos().latitude+","+a.getPos().longitude;
+                task.execute(new String[]{"http://data1500.cs.oslomet.no/~s354378/jsonin.php?Name="+a.getName()+"&Description="+a.getDescription()+"&LatLng="+latlng});
+
+                Toast.makeText(CreateAttractionActivity.this, "Made it this far", Toast.LENGTH_SHORT).show();
+
+                /*try {
                     List<Address> res = coder.getFromLocation(myLatLng.latitude, myLatLng.longitude, 1);
                     a.address = res.get(0).getAddressLine(0);
                     Toast.makeText(CreateAttractionActivity.this, "Registered new Attraction!\nName: " + a.getName() + "\nDesc: "+a.getDescription() +
@@ -62,7 +80,7 @@ public class CreateAttractionActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                     Toast.makeText(CreateAttractionActivity.this, "Houston, we have a problem...", Toast.LENGTH_SHORT).show();
-                }
+                }*/
             }
         });
     }
@@ -75,5 +93,45 @@ public class CreateAttractionActivity extends AppCompatActivity {
         e.putLong("long", Double.doubleToRawLongBits(myLatLng.longitude));
         e.apply();
         startActivity(myIntent);
+    }
+
+    //url for later: https://stackoverflow.com/questions/42767249/android-post-request-with-json
+    public class sendJSON extends AsyncTask<String, Void, String> {
+        JSONObject jsonObject;
+
+        @Override
+        protected String doInBackground(String... urls) {
+            String retur = "";
+            String s = "";
+            String output = "";
+            for (String url : urls) {
+                try {
+                    URL urlen = new URL(urls[0]);
+                    HttpURLConnection conn = (HttpURLConnection)
+                            urlen.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept", "application/json");
+                    if (conn.getResponseCode() != 200) {
+                        throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+                    }
+                    BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                    System.out.println("Output from Server .... \n");
+                    while ((s = br.readLine()) != null) {
+                        output = output + s;
+                    }
+                    conn.disconnect();
+                    System.out.println("The request was completed.");
+                    return retur;
+                } catch (Exception e) {
+                    return "Noe gikk feil";
+                }
+            }
+            return retur;
+        }
+
+        @Override
+        protected void onPostExecute(String ss) {
+            System.out.println("in onPostExecute");
+        }
     }
 }
