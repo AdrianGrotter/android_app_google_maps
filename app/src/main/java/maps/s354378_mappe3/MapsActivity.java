@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +27,14 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -84,6 +93,9 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         mapFragment.getMapAsync(this);
         System.out.println("This was run. "+latLng_global);
 
+        getJSON task = new getJSON();
+        task.execute( new String[] {"http://data1500.cs.oslomet.no/~s354378/jsonout.php"});
+
     }
 
     @Override
@@ -133,7 +145,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     public void onMapLongClick(@NonNull LatLng latLng){
         String output = "Long-pressed location: "+latLng;
         latLng_global = latLng;
-
         Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
         try {
             List<Address> res = coder.getFromLocation(latLng.latitude, latLng.longitude, 1);
@@ -145,6 +156,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         } catch (Exception e) {
             System.out.println(e.getCause());
         }
+
+
 
         //textView.setText(output);
 
@@ -198,5 +211,57 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         e.putLong("long", Double.doubleToRawLongBits(latLng_global.longitude));
         e.apply();
         startActivity(myIntent);
+    }
+
+    public class getJSON extends AsyncTask<String, Void, String> {
+        JSONObject jsonObject;
+
+        @Override
+        protected String doInBackground(String... urls) {
+            String retur = "";
+            String s = "";
+            String output = "";
+            for (String url : urls) {
+                try {
+                    URL urlen = new URL(urls[0]);
+                    HttpURLConnection conn = (HttpURLConnection)
+                            urlen.openConnection();
+                    conn.setRequestMethod("GET");
+                    conn.setRequestProperty("Accept", "application/json");
+                    if (conn.getResponseCode() != 200) {
+                        throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+                    }
+                    BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                    System.out.println("Output from Server .... \n");
+                    while ((s = br.readLine()) != null) {
+                        output = output + s;
+                    }
+                    conn.disconnect();
+                    try {
+                        JSONArray mat = new JSONArray(output);
+                        for (int i = 0; i < mat.length(); i++) {
+                            JSONObject jsonobject = mat.getJSONObject(i);
+                            String name = jsonobject.getString("name");
+                            String description = jsonobject.getString("description");
+                            String pos = jsonobject.getString("latlng");
+                            retur = retur + name + "\n"+description+"\n"+pos;
+                        }
+                        return retur;
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    return retur;
+                } catch (Exception e) {
+                    return "Noe gikk feil";
+                }
+            }
+            return retur;
+        }
+
+        @Override
+        protected void onPostExecute (String ss){
+            System.out.println("Printing");
+            textView.setText(ss);
+        }
     }
 }
