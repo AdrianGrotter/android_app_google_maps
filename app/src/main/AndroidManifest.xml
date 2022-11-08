@@ -36,6 +36,8 @@
         <uses-library android:name="org.apache.http.legacy" android:required="false" />
 
         <activity android:name=".CreateAttractionActivity"/>
+        <activity android:name=".AttractionOverviewActivity"/>
+        <activity android:name=".EditAttractionActivity"/>
         <activity
             android:name=".MapsActivity"
             android:exported="true"
