@@ -13,6 +13,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -212,6 +213,11 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         e.apply();
         startActivity(myIntent);
     }
+     public void toOverview(View v){
+        Intent intent = new Intent(getApplicationContext(), AttractionOverviewActivity.class);
+        startActivity(intent);
+
+     }
 
     public class getJSON extends AsyncTask<String, Void, String> {
         JSONObject jsonObject;

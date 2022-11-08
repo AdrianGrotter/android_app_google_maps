@@ -22,4 +22,14 @@
         android:textAlignment="center"
         android:text="" />
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/btnOverview"
+        android:layout_width="137dp"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="10dp"
+        android:background="@drawable/button_border"
+        android:onClick="toOverview"
+        android:text="@string/btnOverview"
+        android:textColor="#FFFFFF" />
+
 </LinearLayout>
