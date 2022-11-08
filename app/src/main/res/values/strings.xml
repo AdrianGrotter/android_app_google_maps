@@ -6,6 +6,9 @@
     <string name="dialog_cancel">Cancel</string>
 
     <string name="title">Register a new attraction</string>
+    <string name="titleDisplayAttractions">Dine attraksjoner</string>
+    <string name="titleEditAttraction">Endre Attraksjon</string>
     <string name="label_name">Name</string>
     <string name="label_description">Description</string>
+    <string name="btnOverview">Til oversikt</string>
 </resources>
