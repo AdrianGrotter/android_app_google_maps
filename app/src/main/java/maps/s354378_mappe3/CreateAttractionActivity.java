@@ -33,6 +33,7 @@ public class CreateAttractionActivity extends AppCompatActivity {
     LatLng myLatLng;
     EditText description;
     EditText name;
+    Attraction a = new Attraction();
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -59,31 +60,22 @@ public class CreateAttractionActivity extends AppCompatActivity {
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Attraction a = new Attraction();
                 a.description = description.getText().toString();
                 a.name = name.getText().toString();
                 a.pos = myLatLng;
-                Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
-
-                sendJSON task = new sendJSON();
-                String latlng = a.getPos().latitude+","+a.getPos().longitude;
-                task.execute(new String[]{"http://data1500.cs.oslomet.no/~s354378/jsonin.php?Name="+a.getName()+"&Description="+a.getDescription()+"&LatLng="+latlng});
+                GetGeo task1 = new GetGeo();
+                System.out.println("latlng12: "+myLatLng);
+                task1.execute();
 
                 Toast.makeText(CreateAttractionActivity.this, "Made it this far", Toast.LENGTH_SHORT).show();
 
-                /*try {
-                    List<Address> res = coder.getFromLocation(myLatLng.latitude, myLatLng.longitude, 1);
-                    a.address = res.get(0).getAddressLine(0);
-                    Toast.makeText(CreateAttractionActivity.this, "Registered new Attraction!\nName: " + a.getName() + "\nDesc: "+a.getDescription() +
-                            "\nAdress: " + a.getAddress() + "\nLoc: " + a.getPos(), Toast.LENGTH_SHORT).show();
-                    activityMain();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    Toast.makeText(CreateAttractionActivity.this, "Houston, we have a problem...", Toast.LENGTH_SHORT).show();
-                }*/
+                activityMain();
+
             }
         });
     }
+
+
 
     private void activityMain() {
         Intent myIntent = new Intent(this, MapsActivity.class);
@@ -95,6 +87,40 @@ public class CreateAttractionActivity extends AppCompatActivity {
         startActivity(myIntent);
     }
 
+    public class GetGeo extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params){
+            Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
+            String result = "Testvalue";
+
+            try {
+                System.out.println("in try: "+myLatLng);
+                List<Address> res = coder.getFromLocation(myLatLng.latitude, myLatLng.longitude, 5);
+                System.out.println("Res: "+res.get(0).getCountryName());
+                if(!res.isEmpty()) result = res.get(0).getAddressLine(0);
+                else result = "isEmpty";
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("GetGeo catch");
+                result = "catch";
+            }
+
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(String res){
+            super.onPostExecute(res);
+            a.address = res;
+            System.out.println("InPostExecute of GetGeo");
+            sendJSON task = new sendJSON();
+            String latlng = a.getPos().latitude+","+a.getPos().longitude;
+            task.execute(new String[]{"http://data1500.cs.oslomet.no/~s354378/jsonin.php?Name="+a.getName()+"&Description="+a.getDescription()+"&Address="+a.getAddress()+"&LatLng="+latlng});
+
+
+        }
+    }
+
     //url for later: https://stackoverflow.com/questions/42767249/android-post-request-with-json
     public class sendJSON extends AsyncTask<String, Void, String> {
         JSONObject jsonObject;
@@ -104,6 +130,7 @@ public class CreateAttractionActivity extends AppCompatActivity {
             String retur = "";
             String s = "";
             String output = "";
+            System.out.println("Before loop");
             for (String url : urls) {
                 try {
                     URL urlen = new URL(urls[0]);
@@ -126,6 +153,8 @@ public class CreateAttractionActivity extends AppCompatActivity {
                     return "Noe gikk feil";
                 }
             }
+            System.out.println("after loop");
+            System.out.println(retur);
             return retur;
         }
 

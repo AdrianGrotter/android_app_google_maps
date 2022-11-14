@@ -33,6 +33,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -52,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     Marker m;
     LatLng latLng_global;
     List<Attraction> myList;
+    String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -144,19 +146,13 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     @Override
     public void onMapLongClick(@NonNull LatLng latLng){
-        String output = "Long-pressed location: "+latLng;
         latLng_global = latLng;
-        Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
-        try {
-            List<Address> res = coder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-            if(!res.isEmpty()) output += "\nCurrent address is: "+res.get(0).getAddressLine(0);
-            else output+= "\nIngen res";
-            textView.setText(output);
-            m.remove();
-            m  = mMap.addMarker(new MarkerOptions().position(latLng).title("Your new marker"));
-        } catch (Exception e) {
-            System.out.println(e.getCause());
-        }
+        System.out.println(latLng_global);
+        m.remove();
+        m  = mMap.addMarker(new MarkerOptions().position(latLng_global).title("New marker"));
+        GetGeo task1 = new GetGeo();
+        task1.execute();
+
 
 
 
@@ -169,6 +165,33 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         //Create new attraction (address, pos, description) string, LatLng, String
 
         //Send object to database
+    }
+
+    public class GetGeo extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params){
+            Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
+            String output = "Long-pressed location: "+latLng_global;
+            try {
+                List<Address> res = coder.getFromLocation(latLng_global.latitude, latLng_global.longitude, 1);
+                if(!res.isEmpty()) output += "\nCurrent address is: "+res.get(0).getAddressLine(0);
+                else output+= "\nIngen res";
+                textView.setText(output);
+
+                return res.get(0).getAddressLine(0);
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("GetGeo catch");
+            }
+
+            return "Tyttebærstien 311";
+        }
+
+        @Override
+        protected void onPostExecute(String res){
+            super.onPostExecute(res);
+            address = res;
+        }
     }
 
     @Override

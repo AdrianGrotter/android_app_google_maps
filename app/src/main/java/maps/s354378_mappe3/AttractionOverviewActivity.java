@@ -104,9 +104,9 @@ public class AttractionOverviewActivity extends AppCompatActivity {
                 Attraction myAttraction = new Attraction();
                 myAttraction.set_id(Integer.parseInt(newList[0]));
                 myAttraction.setName(newList[1]);
-                myAttraction.setDescription(newList[2]);
-                myAttraction.setAddress("Jordbærstien 2");
-                String[] ll = newList[3].split("\\.");
+                myAttraction.setDescription(newList[3]);
+                myAttraction.setAddress(newList[2]);
+                String[] ll = newList[4].split("\\.");
                 if(ll.length > 1)
                 myAttraction.setPos(new LatLng(Double.parseDouble(ll[0]), Double.parseDouble(ll[1])));
                 else myAttraction.setPos(new LatLng(1,1));
