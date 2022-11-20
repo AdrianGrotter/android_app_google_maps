@@ -130,37 +130,32 @@ public class CreateAttractionActivity extends AppCompatActivity {
             String retur = "";
             String s = "";
             String output = "";
-            System.out.println("Before loop");
             for (String url : urls) {
                 try {
                     URL urlen = new URL(urls[0]);
-                    HttpURLConnection conn = (HttpURLConnection)
-                            urlen.openConnection();
+                    HttpURLConnection conn = (HttpURLConnection) urlen.openConnection();
                     conn.setRequestMethod("GET");
                     conn.setRequestProperty("Accept", "application/json");
                     if (conn.getResponseCode() != 200) {
                         throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
                     }
                     BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-                    System.out.println("Output from Server .... \n");
                     while ((s = br.readLine()) != null) {
                         output = output + s;
                     }
                     conn.disconnect();
-                    System.out.println("The request was completed.");
                     return retur;
                 } catch (Exception e) {
-                    return "Noe gikk feil";
+                    return "Noe gikk galt";
                 }
             }
-            System.out.println("after loop");
             System.out.println(retur);
             return retur;
         }
 
         @Override
         protected void onPostExecute(String ss) {
-            System.out.println("in onPostExecute");
+            System.out.println("onPostExecute");
         }
     }
 }

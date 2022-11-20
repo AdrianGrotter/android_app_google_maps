@@ -63,7 +63,6 @@ public class AttractionOverviewActivity extends AppCompatActivity {
                         throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
                     }
                     BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-                    System.out.println("Output from Server .... \n");
                     while ((s = br.readLine()) != null) {
                         output = output + s;
                     }
