@@ -1,5 +1,6 @@
 package maps.s354378_mappe3;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -90,22 +91,38 @@ public class CreateAttractionActivity extends AppCompatActivity {
     public class GetGeo extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params){
-            Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
-            String result = "Testvalue";
+            String query = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + myLatLng.latitude + "," + myLatLng.longitude + "&key=" + getResources().getString(R.string.key);
+            String output = "";
+            String s = "";
+            String res = "";
+            JSONObject jsonObject;
 
+            System.out.println("Attempting to fetch address...");
             try {
-                System.out.println("in try: "+myLatLng);
-                List<Address> res = coder.getFromLocation(myLatLng.latitude, myLatLng.longitude, 5);
-                System.out.println("Res: "+res.get(0).getCountryName());
-                if(!res.isEmpty()) result = res.get(0).getAddressLine(0);
-                else result = "isEmpty";
-            } catch (IOException e) {
+                URL urlen = new URL(query);
+                HttpURLConnection conn = (HttpURLConnection) urlen.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setReadTimeout(15000);
+                conn.setConnectTimeout(1500);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Accept", "application/json");
+                if (conn.getResponseCode() != 200) {
+                    throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+                }
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                while ((s = br.readLine()) != null) {
+                    output = output + s;
+                }
+                jsonObject = new JSONObject(output.toString());
+                conn.disconnect();
+                res = ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
+            } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("GetGeo catch");
-                result = "catch";
+                res = "catch";
             }
 
-            return result;
+            return res;
         }
 
         @Override
@@ -116,8 +133,6 @@ public class CreateAttractionActivity extends AppCompatActivity {
             sendJSON task = new sendJSON();
             String latlng = a.getPos().latitude+","+a.getPos().longitude;
             task.execute(new String[]{"http://data1500.cs.oslomet.no/~s354378/jsonin.php?Name="+a.getName()+"&Description="+a.getDescription()+"&Address="+a.getAddress()+"&LatLng="+latlng});
-
-
         }
     }
 
@@ -133,8 +148,9 @@ public class CreateAttractionActivity extends AppCompatActivity {
             for (String url : urls) {
                 try {
                     URL urlen = new URL(urls[0]);
+                    System.out.println(urls[0]);
                     HttpURLConnection conn = (HttpURLConnection) urlen.openConnection();
-                    conn.setRequestMethod("GET");
+                    conn.setRequestMethod("POST");
                     conn.setRequestProperty("Accept", "application/json");
                     if (conn.getResponseCode() != 200) {
                         throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
@@ -149,13 +165,12 @@ public class CreateAttractionActivity extends AppCompatActivity {
                     return "Noe gikk galt";
                 }
             }
-            System.out.println(retur);
             return retur;
         }
 
         @Override
         protected void onPostExecute(String ss) {
-            System.out.println("onPostExecute");
+            System.out.println("onPostExecute: "+ss);
         }
     }
 }

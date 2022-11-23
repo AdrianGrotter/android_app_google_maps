@@ -169,28 +169,46 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     public class GetGeo extends AsyncTask<String, Void, String> {
         @Override
-        protected String doInBackground(String... params){
-            Geocoder coder = new Geocoder(getApplicationContext(), Locale.getDefault());
-            String output = "Long-pressed location: "+latLng_global;
-            try {
-                List<Address> res = coder.getFromLocation(latLng_global.latitude, latLng_global.longitude, 1);
-                if(!res.isEmpty()) output += "\nCurrent address is: "+res.get(0).getAddressLine(0);
-                else output+= "\nIngen res";
-                textView.setText(output);
+        protected String doInBackground(String... params) {
+            String query = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key);
+            String output = "";
+            String s = "";
+            String res = "";
+            JSONObject jsonObject;
 
-                return res.get(0).getAddressLine(0);
-            } catch (IOException e) {
+            System.out.println("Attempting to fetch address...");
+            try {
+                URL urlen = new URL(query);
+                HttpURLConnection conn = (HttpURLConnection) urlen.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setReadTimeout(15000);
+                conn.setConnectTimeout(1500);
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Accept", "application/json");
+                if (conn.getResponseCode() != 200) {
+                    throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
+                }
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                while ((s = br.readLine()) != null) {
+                    output = output + s;
+                }
+                jsonObject = new JSONObject(output.toString());
+                conn.disconnect();
+                res = ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
+            } catch (Exception e) {
                 e.printStackTrace();
-                System.out.println("GetGeo catch");
+                res = "catch";
             }
 
-            return "Tyttebærstien 311";
+            return res;
         }
 
         @Override
-        protected void onPostExecute(String res){
+        protected void onPostExecute(String res) {
             super.onPostExecute(res);
             address = res;
+
         }
     }
 
