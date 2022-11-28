@@ -1,6 +1,7 @@
 package maps.s354378_mappe3;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 
@@ -13,6 +14,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
         myList = new ArrayList<Attraction>();
 
-        Attraction myAttraction = new Attraction();
+        /*Attraction myAttraction = new Attraction();
         myAttraction.setName("Soldier of the golden tides");
         myAttraction.setDescription("Brass statue showing a soldier in combat");
         myAttraction.setAddress("Statueveien 15C");
@@ -80,7 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         myAttraction3.setDescription("Artwork on display");
         myAttraction3.setAddress("Tollbugaten 2");
         myAttraction3.setPos(new LatLng(-50,110));
-        myList.add(myAttraction3);
+        myList.add(myAttraction3);*/
 
         SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
         latLng_global = new LatLng(Double.longBitsToDouble(sp.getLong("lat", 0)),
@@ -94,7 +96,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        System.out.println("This was run. "+latLng_global);
 
         getJSON task = new getJSON();
         task.execute( new String[] {"http://data1500.cs.oslomet.no/~s354378/jsonout.php"});
@@ -120,35 +121,28 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        if(latLng_global != null){
-            myMarker = new MarkerOptions().position(latLng_global).title("Recreated marker");
-        }else{
-            LatLng sydney = new LatLng(-34, 151);
-            myMarker = new MarkerOptions().position(sydney).title("Marker in Sydney");
-            latLng_global = sydney;
-        }
-
-        m = mMap.addMarker(myMarker);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng_global));
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
         mMap.setOnCameraIdleListener(this);
         mMap.setOnMarkerClickListener(this);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
+        System.out.println("this");
         for(Attraction a : myList){
             myMarker = new MarkerOptions().position(a.pos).title(a.name);
             mMap.addMarker(myMarker);
         }
-
     }
 
     @Override
     public void onMapLongClick(@NonNull LatLng latLng){
         latLng_global = latLng;
         System.out.println(latLng_global);
-        m.remove();
+
+        if(m!= null){
+            m.remove();
+        }
+
         m  = mMap.addMarker(new MarkerOptions().position(latLng_global).title("New marker"));
         GetGeo task1 = new GetGeo();
         task1.execute();
@@ -224,24 +218,32 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage(R.string.dialog_content).setTitle("MyTitle");
-        builder.setPositiveButton(R.string.dialog_accept, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                activityCreateAttraction();
-            }
-        });
-        builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MapsActivity.this, "Cancelled", Toast.LENGTH_SHORT).show();
-            }
-        });
+        /*if(marker.getTitle().equals("New marker")){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage(R.string.dialog_content).setTitle(marker.getTitle());
+            builder.setPositiveButton(R.string.dialog_accept, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    activityCreateAttraction();
+                }
+            });
+            builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Toast.makeText(MapsActivity.this, "Cancelled", Toast.LENGTH_SHORT).show();
+                }
+            });
 
 
-        AlertDialog dialog = builder.create();
-        dialog.show();
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }else{
+            Toast.makeText(this, "Old marker", Toast.LENGTH_SHORT).show();
+        }*/
+
+        BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
+        bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+
         return false;
     }
 
@@ -287,12 +289,19 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                     try {
                         JSONArray mat = new JSONArray(output);
                         for (int i = 0; i < mat.length(); i++) {
+                            Attraction myAttraction = new Attraction();
                             jsonObject = mat.getJSONObject(i);
-                            String name = jsonObject.getString("name");
-                            String description = jsonObject.getString("description");
-                            String pos = jsonObject.getString("latlng");
-                            retur = retur + name + "\n"+description+"\n"+pos;
+                            myAttraction.setName(jsonObject.getString("name"));
+                            myAttraction.setDescription(jsonObject.getString("description"));
+                            String[] l = jsonObject.getString("latlng").split(",");
+                            LatLng myLatLng = new LatLng(Double.parseDouble(l[0]), Double.parseDouble(l[1]));
+                            myAttraction.setPos(myLatLng);;
+                            myList.add(myAttraction);
                         }
+
+
+
+
                         return retur;
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -308,6 +317,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         @Override
         protected void onPostExecute (String ss){
             System.out.println("Printing");
+
+
             textView.setText(ss);
         }
     }
