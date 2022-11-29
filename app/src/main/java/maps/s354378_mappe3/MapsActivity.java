@@ -51,12 +51,10 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
-    TextView textView;
     MarkerOptions myMarker;
     Marker m;
     LatLng latLng_global;
     List<Attraction> myList;
-    String address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
