@@ -27,31 +27,81 @@
             android:layout_weight="5"
             android:orientation="vertical">
 
-            <TextView
+            <EditText
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Create a new Attraction"
-                android:id="@+id/popuptitle"
+                android:id="@+id/inputName"
+                android:hint="Enter a name..."
                 android:textColor="#000000"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Address"
-                android:textColor="#5692F5" />
+                android:text="hi"
+                android:id="@+id/textname"
+                android:textColor="#000000" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/popuptitle"
+                android:textColor="#000000" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="hi"
+                android:id="@+id/pos"
+                android:textColor="#000000" />
+
+            <EditText
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/inputDesc"
+                android:hint="Describe the attraction..."
+                android:textColor="#000000"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/textviewdesc"
+                android:textColor="#000000" />
 
         </LinearLayout>
 
     </LinearLayout>
 
     <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/btnSubmitForm"
+        android:layout_width="374dp"
+        android:layout_height="41dp"
         android:layout_marginTop="16dp"
         android:background="#000"
-        android:text="CREATE ATTRACTION"
+        android:paddingHorizontal="10dp"
+        android:paddingVertical="3dp"
+        android:text="Submit"
         android:textColor="#fff" />
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/edit"
+        android:layout_width="51dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:background="@android:color/transparent"
+        android:drawableStart="@drawable/edit_48px"
+        android:onClick="edit"
+        android:textColor="@color/white" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/delete"
+        android:layout_width="46dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:background="@android:color/transparent"
+        android:drawableStart="@drawable/delete_48px"
+        android:onClick="delete"
+        android:textColor="@color/white" />
 </LinearLayout>

@@ -42,6 +42,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 import maps.s354378_mappe3.databinding.ActivityMapsBinding;
 
@@ -63,39 +64,18 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
         myList = new ArrayList<Attraction>();
 
-        /*Attraction myAttraction = new Attraction();
-        myAttraction.setName("Soldier of the golden tides");
-        myAttraction.setDescription("Brass statue showing a soldier in combat");
-        myAttraction.setAddress("Statueveien 15C");
-        myAttraction.setPos(new LatLng(5,5));
-        myList.add(myAttraction);
-
-        Attraction myAttraction2 = new Attraction();
-        myAttraction2.setName("Noble steed");
-        myAttraction2.setDescription("Majestic steed carrying its master into battle");
-        myAttraction2.setAddress("Ole Henders alle 11");
-        myAttraction2.setPos(new LatLng(-20,110));
-        myList.add(myAttraction2);
-
-        Attraction myAttraction3 = new Attraction();
-        myAttraction3.setName("Coral Reef");
-        myAttraction3.setDescription("Artwork on display");
-        myAttraction3.setAddress("Tollbugaten 2");
-        myAttraction3.setPos(new LatLng(-50,110));
-        myList.add(myAttraction3);*/
-
         SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
         latLng_global = new LatLng(Double.longBitsToDouble(sp.getLong("lat", 0)),
                 Double.longBitsToDouble(sp.getLong("long", 0)));
 
         binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        textView = (TextView)findViewById(R.id.textView);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
 
         getJSON task = new getJSON();
         task.execute( new String[] {"http://data1500.cs.oslomet.no/~s354378/jsonout.php"});
@@ -105,7 +85,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     @Override
     public void onMapClick(LatLng point) {
         String output = "Tapped on "+point+"!";
-        textView.setText(output);
         Toast.makeText(this, "Tapped on "+point+"!", Toast.LENGTH_SHORT).show();
     }
     /**
@@ -126,12 +105,14 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         mMap.setOnCameraIdleListener(this);
         mMap.setOnMarkerClickListener(this);
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.91, 10.76),4));
 
         System.out.println("this");
         for(Attraction a : myList){
-            myMarker = new MarkerOptions().position(a.pos).title(a.name);
+            myMarker = new MarkerOptions().position(a.pos).title(a.address);
             mMap.addMarker(myMarker);
         }
+        m = mMap.addMarker(new MarkerOptions().position(new LatLng(0,0)).title("placeholder").visible(false));
     }
 
     @Override
@@ -142,33 +123,17 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         if(m!= null){
             m.remove();
         }
-
-        m  = mMap.addMarker(new MarkerOptions().position(latLng_global).title("New marker"));
         GetGeo task1 = new GetGeo();
         task1.execute();
 
-
-
-
-        //textView.setText(output);
-
-        //Check if location is an actual address
-
-        //Display button to save location as new attraction
-
-        //Create new attraction (address, pos, description) string, LatLng, String
-
-        //Send object to database
     }
 
-    public class GetGeo extends AsyncTask<String, Void, String> {
+    public class GetGeo extends AsyncTask<Void, Void, String> {
         @Override
-        protected String doInBackground(String... params) {
+        protected String doInBackground(Void ... Voids) {
             String query = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key);
             String output = "";
             String s = "";
-            String res = "";
-            JSONObject jsonObject;
 
             System.out.println("Attempting to fetch address...");
             try {
@@ -187,21 +152,20 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                 while ((s = br.readLine()) != null) {
                     output = output + s;
                 }
-                jsonObject = new JSONObject(output.toString());
+                JSONObject jsonObject = new JSONObject(output);
                 conn.disconnect();
-                res = ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
+                return ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
             } catch (Exception e) {
                 e.printStackTrace();
-                res = "catch";
+                return "catch";
             }
-
-            return res;
         }
 
         @Override
         protected void onPostExecute(String res) {
             super.onPostExecute(res);
-            address = res;
+            System.out.println("Created marker with address: "+res);
+            m = mMap.addMarker(new MarkerOptions().position(latLng_global).title(res));
 
         }
     }
@@ -218,49 +182,30 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     @Override
     public boolean onMarkerClick(@NonNull Marker marker) {
-        /*if(marker.getTitle().equals("New marker")){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage(R.string.dialog_content).setTitle(marker.getTitle());
-            builder.setPositiveButton(R.string.dialog_accept, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    activityCreateAttraction();
+        Bundle mybundle = new Bundle();
+        mybundle.putString("title", marker.getTitle());
+        mybundle.putParcelable("pos", marker.getPosition());
+        if(m!=null) mybundle.putBoolean("new", marker.getId().equals(m.getId()));
+        else mybundle.putBoolean("new", false);
+        if(!marker.getId().equals(m.getId())){
+            for (Attraction a : myList){
+                if(a.address.equals(marker.getTitle())){
+                    mybundle.putString("desc", a.description);
+                    mybundle.putString("name", a.name);
+                    mybundle.putInt("id", a.get_id());
                 }
-            });
-            builder.setNegativeButton(R.string.dialog_cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    Toast.makeText(MapsActivity.this, "Cancelled", Toast.LENGTH_SHORT).show();
-                }
-            });
-
-
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }else{
-            Toast.makeText(this, "Old marker", Toast.LENGTH_SHORT).show();
-        }*/
-
+            }
+        }
         BottomSheetFragment bottomSheetFragment = new BottomSheetFragment();
+        bottomSheetFragment.setArguments(mybundle);
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
+
+
 
         return false;
     }
 
-    private void activityCreateAttraction() {
-        Intent myIntent = new Intent(this, CreateAttractionActivity.class);
-        SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
-        SharedPreferences.Editor e = sp.edit();
-        e.putLong("lat", Double.doubleToRawLongBits(latLng_global.latitude));
-        e.putLong("long", Double.doubleToRawLongBits(latLng_global.longitude));
-        e.apply();
-        startActivity(myIntent);
-    }
-     public void toOverview(View v){
-        Intent intent = new Intent(getApplicationContext(), AttractionOverviewActivity.class);
-        startActivity(intent);
 
-     }
 
     public class getJSON extends AsyncTask<String, Void, String> {
         JSONObject jsonObject;
@@ -270,56 +215,52 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
             String retur = "";
             String s = "";
             String output = "";
-            for (String url : urls) {
-                try {
-                    URL urlen = new URL(urls[0]);
-                    HttpURLConnection conn = (HttpURLConnection)
-                            urlen.openConnection();
-                    conn.setRequestMethod("GET");
-                    conn.setRequestProperty("Accept", "application/json");
-                    if (conn.getResponseCode() != 200) {
-                        throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
-                    }
-                    BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-                    System.out.println("Output from Server .... \n");
-                    while ((s = br.readLine()) != null) {
-                        output = output + s;
-                    }
-                    conn.disconnect();
-                    try {
-                        JSONArray mat = new JSONArray(output);
-                        for (int i = 0; i < mat.length(); i++) {
-                            Attraction myAttraction = new Attraction();
-                            jsonObject = mat.getJSONObject(i);
-                            myAttraction.setName(jsonObject.getString("name"));
-                            myAttraction.setDescription(jsonObject.getString("description"));
-                            String[] l = jsonObject.getString("latlng").split(",");
-                            LatLng myLatLng = new LatLng(Double.parseDouble(l[0]), Double.parseDouble(l[1]));
-                            myAttraction.setPos(myLatLng);;
-                            myList.add(myAttraction);
-                        }
-
-
-
-
-                        return retur;
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-                    return retur;
-                } catch (Exception e) {
-                    return "Noe gikk feil";
+            try {
+                URL urlen = new URL(urls[0]);
+                HttpURLConnection conn = (HttpURLConnection)
+                        urlen.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Accept", "application/json");
+                if (conn.getResponseCode() != 200) {
+                    throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
                 }
+                BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
+                System.out.println("Output from Server .... \n");
+                while ((s = br.readLine()) != null) {
+                    output = output + s;
+                }
+                conn.disconnect();
+                try {
+                    JSONArray mat = new JSONArray(output);
+                    for (int i = 0; i < mat.length(); i++) {
+                        Attraction myAttraction = new Attraction();
+                        jsonObject = mat.getJSONObject(i);
+
+                        myAttraction.set_id(Integer.parseInt(jsonObject.getString("id")));
+                        myAttraction.setName(jsonObject.getString("name"));
+                        myAttraction.setDescription(jsonObject.getString("description"));
+                        myAttraction.setAddress(jsonObject.getString("address"));
+
+                        String[] l = jsonObject.getString("latlng").split(",");
+                        LatLng myLatLng = new LatLng(Double.parseDouble(l[0]), Double.parseDouble(l[1]));
+                        myAttraction.setPos(myLatLng);;
+
+                        myList.add(myAttraction);
+                    }
+
+                    return retur;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return retur;
+            } catch (Exception e) {
+                return "Noe gikk feil";
             }
-            return retur;
         }
 
         @Override
         protected void onPostExecute (String ss){
             System.out.println("Printing");
-
-
-            textView.setText(ss);
         }
     }
 }
