@@ -5,11 +5,13 @@
     <string name="dialog_accept">Yes</string>
     <string name="dialog_cancel">Cancel</string>
 
-    <string name="title">Register a new attraction</string>
-    <string name="titleDisplayAttractions">Dine attraksjoner</string>
     <string name="titleEditAttraction">Endre Attraksjon</string>
     <string name="label_name">Name</string>
     <string name="label_description">Description</string>
-    <string name="btnOverview">Til oversikt</string>
     <string name="key">AIzaSyAH8oo3c6sbt3ySyfHQp6Y7GoYE8ySFl_M</string>
+    <string name="hintDesc">Describe the attraction…</string>
+    <string name="hintName">Enter a name…</string>
+
+    <string name="btnSave">Save</string>
+
 </resources>
