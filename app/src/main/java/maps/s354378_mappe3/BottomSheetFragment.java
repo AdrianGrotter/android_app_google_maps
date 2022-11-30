@@ -52,13 +52,13 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         String lng;
 
         if(getArguments() != null){
-            TextView title = getView().findViewById(R.id.popuptitle);
+            TextView address = getView().findViewById(R.id.popupaddress);
             TextView pos = getView().findViewById(R.id.pos);
-            title.setText(getArguments().getString("title"));
+            address.setText(getArguments().getString("title"));
             LatLng position = getArguments().getParcelable("pos");
             lat = formatPosition(position.latitude);
             lng = formatPosition(position.longitude);
-            String res = "Position: " + lat + " " + lng;
+            String res = "Position: " + lat + ", " + lng;
             pos.setText(res);
 
 
@@ -74,7 +74,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             if(!getArguments().getBoolean("new")){
                 name.setVisibility(View.GONE);
                 desc.setVisibility(View.GONE);
-                submit.setVisibility(View.GONE);
+                submit.setVisibility(View.INVISIBLE);
                 textDesc.setText(getArguments().getString("desc"));
                 textName.setText(getArguments().getString("name"));
 

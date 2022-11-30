@@ -51,7 +51,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     private GoogleMap mMap;
     private ActivityMapsBinding binding;
-    MarkerOptions myMarker;
     Marker m;
     LatLng latLng_global;
     List<Attraction> myList;
@@ -82,7 +81,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
     @Override
     public void onMapClick(LatLng point) {
-        String output = "Tapped on "+point+"!";
         Toast.makeText(this, "Tapped on "+point+"!", Toast.LENGTH_SHORT).show();
     }
     /**
@@ -107,7 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
         System.out.println("this");
         for(Attraction a : myList){
-            myMarker = new MarkerOptions().position(a.pos).title(a.address);
+            MarkerOptions myMarker = new MarkerOptions().position(a.pos).title(a.address);
             mMap.addMarker(myMarker);
         }
         m = mMap.addMarker(new MarkerOptions().position(new LatLng(0,0)).title("placeholder").visible(false));
@@ -124,6 +122,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         GetGeo task1 = new GetGeo();
         task1.execute();
 
+        Toast.makeText(MapsActivity.this, "Fetching address...", Toast.LENGTH_SHORT).show();
+
     }
 
     public class GetGeo extends AsyncTask<Void, Void, String> {
@@ -132,8 +132,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
             String query = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key);
             String output = "";
             String s = "";
-
-            System.out.println("Attempting to fetch address...");
+            System.out.println("Fetching address..." + "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key));
             try {
                 URL urlen = new URL(query);
                 HttpURLConnection conn = (HttpURLConnection) urlen.openConnection();
@@ -154,8 +153,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                 conn.disconnect();
                 return ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
             } catch (Exception e) {
-                e.printStackTrace();
-                return "catch";
+                return "Failed to fetch address :(";
             }
         }
 
