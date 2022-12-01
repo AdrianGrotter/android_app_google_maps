@@ -103,7 +103,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(59.91, 10.76),4));
 
-        System.out.println("this");
         for(Attraction a : myList){
             MarkerOptions myMarker = new MarkerOptions().position(a.pos).title(a.address);
             mMap.addMarker(myMarker);
@@ -153,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                 conn.disconnect();
                 return ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
             } catch (Exception e) {
-                return "Failed to fetch address :(";
+                return "Failed to fetch address...";
             }
         }
 
