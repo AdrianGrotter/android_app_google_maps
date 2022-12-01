@@ -17,10 +17,6 @@ import androidx.annotation.Nullable;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -78,46 +74,37 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 textDesc.setText(getArguments().getString("desc"));
                 textName.setText(getArguments().getString("name"));
 
-                edit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Intent intent = new Intent(view.getContext(), EditAttractionActivity.class);
-                        intent.putExtra("id", getArguments().getInt("id"));
-                        intent.putExtra("name", getArguments().getString("name"));
-                        intent.putExtra("address", getArguments().getString("title"));
-                        intent.putExtra("desc", getArguments().getString("desc"));
-                        Bundle b = new Bundle();
-                        LatLng m = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
-                        b.putParcelable("lat", m);
-                        intent.putExtra("bundle", b);
-                        view.getContext().startActivity(intent);
-                    }
+                edit.setOnClickListener(v -> {
+                    Intent intent = new Intent(view.getContext(), EditAttractionActivity.class);
+                    intent.putExtra("id", getArguments().getInt("id"));
+                    intent.putExtra("name", getArguments().getString("name"));
+                    intent.putExtra("address", getArguments().getString("title"));
+                    intent.putExtra("desc", getArguments().getString("desc"));
+                    Bundle b = new Bundle();
+                    LatLng m = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+                    b.putParcelable("lat", m);
+                    intent.putExtra("bundle", b);
+                    view.getContext().startActivity(intent);
                 });
 
-                delete.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        System.out.println(getArguments().getInt("id"));
-                        sendJSON task = new sendJSON();
-                        task.execute(new String[]{"http://data1500.cs.oslomet.no/~s354378/jsondelete.php?Id="+getArguments().getInt("id")});
-                        reload();
-                        Toast.makeText(getContext(), "Attraction was deleted", Toast.LENGTH_SHORT).show();
-                    }
+                delete.setOnClickListener(v -> {
+                    System.out.println(getArguments().getInt("id"));
+                    sendJSON task = new sendJSON();
+                    task.execute("http://data1500.cs.oslomet.no/~s354378/jsondelete.php?Id="+getArguments().getInt("id"));
+                    reload();
+                    Toast.makeText(getContext(), "Attraction was deleted", Toast.LENGTH_SHORT).show();
                 });
             }else{
                 textName.setVisibility(View.GONE);
                 textDesc.setVisibility(View.GONE);
                 delete.setVisibility(View.GONE);
                 edit.setVisibility(View.GONE);
-                submit.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        String latlng = lat+","+lng;
-                        sendJSON task = new sendJSON();
-                        task.execute(new String[]{"http://data1500.cs.oslomet.no/~s354378/jsonin.php?Name="+name.getText().toString()+"&Description="+desc.getText().toString()+"&Address="+getArguments().getString("title")+"&LatLng="+latlng});
-                        reload();
-                        Toast.makeText(getContext(), "Attraction was saved!", Toast.LENGTH_SHORT).show();
-                    }
+                submit.setOnClickListener(v -> {
+                    String latlng = lat+","+lng;
+                    sendJSON task = new sendJSON();
+                    task.execute("http://data1500.cs.oslomet.no/~s354378/jsonin.php?Name="+name.getText().toString()+"&Description="+desc.getText().toString()+"&Address="+getArguments().getString("title")+"&LatLng="+latlng);
+                    reload();
+                    Toast.makeText(getContext(), "Attraction was saved!", Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -133,7 +120,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         if(d < -10) return String.valueOf(d).substring(0,6);
         else if(d < 0 || d > 10) return String.valueOf(d).substring(0,5);
         else return String.valueOf(d).substring(0,4);
-    };
+    }
 
 
     public class sendJSON extends AsyncTask<String, Void, String> {
@@ -141,8 +128,8 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
         @Override
         protected String doInBackground(String... urls) {
             String retur = "";
-            String s = "";
-            String output = "";
+            String s;
+            StringBuilder output = new StringBuilder();
 
             try {
                 URL urlen = new URL(urls[0]);
@@ -154,7 +141,7 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 }
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
                 while ((s = br.readLine()) != null) {
-                    output = output + s;
+                    output.append(s);
                 }
                 conn.disconnect();
                 return retur;

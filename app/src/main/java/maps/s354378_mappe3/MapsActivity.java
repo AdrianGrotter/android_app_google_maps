@@ -1,22 +1,12 @@
 package maps.s354378_mappe3;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.PopupMenu;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -35,14 +25,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
 
 import maps.s354378_mappe3.databinding.ActivityMapsBinding;
 
@@ -50,7 +37,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
-    private ActivityMapsBinding binding;
     Marker m;
     LatLng latLng_global;
     List<Attraction> myList;
@@ -59,13 +45,13 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        myList = new ArrayList<Attraction>();
+        myList = new ArrayList<>();
 
         SharedPreferences sp = getSharedPreferences("my_prefs", Activity.MODE_PRIVATE);
         latLng_global = new LatLng(Double.longBitsToDouble(sp.getLong("lat", 0)),
                 Double.longBitsToDouble(sp.getLong("long", 0)));
 
-        binding = ActivityMapsBinding.inflate(getLayoutInflater());
+        maps.s354378_mappe3.databinding.ActivityMapsBinding binding = ActivityMapsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -75,12 +61,12 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
 
         getJSON task = new getJSON();
-        task.execute( new String[] {"http://data1500.cs.oslomet.no/~s354378/jsonout.php"});
+        task.execute("http://data1500.cs.oslomet.no/~s354378/jsonout.php");
 
     }
 
     @Override
-    public void onMapClick(LatLng point) {
+    public void onMapClick(@NonNull LatLng point) {
         Toast.makeText(this, "Tapped on "+point+"!", Toast.LENGTH_SHORT).show();
     }
     /**
@@ -93,7 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
      * installed Google Play services and returned to the app.
      */
     @Override
-    public void onMapReady(GoogleMap googleMap) {
+    public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
 
         mMap.setOnMapClickListener(this);
@@ -129,8 +115,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         @Override
         protected String doInBackground(Void ... Voids) {
             String query = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key);
-            String output = "";
-            String s = "";
+            StringBuilder output = new StringBuilder();
+            String s;
             System.out.println("Fetching address..." + "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key));
             try {
                 URL urlen = new URL(query);
@@ -146,9 +132,9 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                 }
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
                 while ((s = br.readLine()) != null) {
-                    output = output + s;
+                    output.append(s);
                 }
-                JSONObject jsonObject = new JSONObject(output);
+                JSONObject jsonObject = new JSONObject(output.toString());
                 conn.disconnect();
                 return ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
             } catch (Exception e) {
@@ -208,8 +194,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         @Override
         protected String doInBackground(String... urls) {
             String retur = "";
-            String s = "";
-            String output = "";
+            String s;
+            StringBuilder output = new StringBuilder();
             try {
                 URL urlen = new URL(urls[0]);
                 HttpURLConnection conn = (HttpURLConnection)
@@ -222,11 +208,11 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
                 System.out.println("Output from Server .... \n");
                 while ((s = br.readLine()) != null) {
-                    output = output + s;
+                    output.append(s);
                 }
                 conn.disconnect();
                 try {
-                    JSONArray mat = new JSONArray(output);
+                    JSONArray mat = new JSONArray(output.toString());
                     for (int i = 0; i < mat.length(); i++) {
                         Attraction myAttraction = new Attraction();
                         jsonObject = mat.getJSONObject(i);
@@ -238,7 +224,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
                         String[] l = jsonObject.getString("latlng").split(",");
                         LatLng myLatLng = new LatLng(Double.parseDouble(l[0]), Double.parseDouble(l[1]));
-                        myAttraction.setPos(myLatLng);;
+                        myAttraction.setPos(myLatLng);
 
                         myList.add(myAttraction);
                     }
