@@ -144,6 +144,7 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         protected void onPostExecute(String res) {
             super.onPostExecute(res);
             m = mMap.addMarker(new MarkerOptions().position(latLng_global).title(res));
+            Toast.makeText(MapsActivity.this, "Marker created!", Toast.LENGTH_SHORT).show();
 
         }
     }
