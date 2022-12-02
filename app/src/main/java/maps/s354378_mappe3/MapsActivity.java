@@ -99,7 +99,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
     @Override
     public void onMapLongClick(@NonNull LatLng latLng){
         latLng_global = latLng;
-        System.out.println(latLng_global);
 
         if(m!= null){
             m.remove();
@@ -117,7 +116,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
             String query = "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key);
             StringBuilder output = new StringBuilder();
             String s;
-            System.out.println("Fetching address..." + "https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latLng_global.latitude + "," + latLng_global.longitude + "&key=" + getResources().getString(R.string.key));
             try {
                 URL urlen = new URL(query);
                 HttpURLConnection conn = (HttpURLConnection) urlen.openConnection();
@@ -145,7 +143,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         @Override
         protected void onPostExecute(String res) {
             super.onPostExecute(res);
-            System.out.println("Created marker with address: "+res);
             m = mMap.addMarker(new MarkerOptions().position(latLng_global).title(res));
 
         }
@@ -181,12 +178,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         bottomSheetFragment.setArguments(mybundle);
         bottomSheetFragment.show(getSupportFragmentManager(), bottomSheetFragment.getTag());
 
-
-
         return false;
     }
-
-
 
     public class getJSON extends AsyncTask<String, Void, String> {
         JSONObject jsonObject;
@@ -206,7 +199,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                     throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
                 }
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-                System.out.println("Output from Server .... \n");
                 while ((s = br.readLine()) != null) {
                     output.append(s);
                 }
