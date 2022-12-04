@@ -134,6 +134,8 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
                 }
                 JSONObject jsonObject = new JSONObject(output.toString());
                 conn.disconnect();
+                System.out.println(((JSONArray) jsonObject.get("results")).getJSONObject(0));System.out.println(((JSONArray) jsonObject.get("results")).getJSONObject(1));
+
                 return ((JSONArray) jsonObject.get("results")).getJSONObject(0).getString("formatted_address");
             } catch (Exception e) {
                 return "Failed to fetch address...";
@@ -143,9 +145,11 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
         @Override
         protected void onPostExecute(String res) {
             super.onPostExecute(res);
-            m = mMap.addMarker(new MarkerOptions().position(latLng_global).title(res));
-            Toast.makeText(MapsActivity.this, "Marker created!", Toast.LENGTH_SHORT).show();
-
+            if(res.contains("+")) Toast.makeText(MapsActivity.this, res + " er ikke en gyldig addresse!", Toast.LENGTH_SHORT).show();
+            else{
+                m = mMap.addMarker(new MarkerOptions().position(latLng_global).title(res));
+                Toast.makeText(MapsActivity.this, "Marker created!", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
