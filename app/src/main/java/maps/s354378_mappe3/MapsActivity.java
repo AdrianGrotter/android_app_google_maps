@@ -236,7 +236,6 @@ public class MapsActivity extends FragmentActivity implements OnMapClickListener
 
         @Override
         protected void onPostExecute (String ss){
-            System.out.println("Printing");
         }
     }
 }

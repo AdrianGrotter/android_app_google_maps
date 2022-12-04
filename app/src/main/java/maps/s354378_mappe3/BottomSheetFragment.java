@@ -66,7 +66,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
             Button delete = getView().findViewById(R.id.delete);
             Button submit = getView().findViewById(R.id.btnSubmitForm);
 
-            System.out.println(getArguments().getBoolean("new"));
             if(!getArguments().getBoolean("new")){
                 name.setVisibility(View.GONE);
                 desc.setVisibility(View.GONE);
@@ -88,7 +87,6 @@ public class BottomSheetFragment extends BottomSheetDialogFragment {
                 });
 
                 delete.setOnClickListener(v -> {
-                    System.out.println(getArguments().getInt("id"));
                     sendJSON task = new sendJSON();
                     task.execute("http://data1500.cs.oslomet.no/~s354378/jsondelete.php?Id="+getArguments().getInt("id"));
                     reload();

@@ -44,7 +44,6 @@ public class EditAttractionActivity extends AppCompatActivity {
 
             sendJSON task = new sendJSON();
             String latlng = a.getPos().latitude+","+a.getPos().longitude;
-            System.out.println(a.get_id()+"\n"+a.getName()+"\n"+a.getDescription()+"\n"+a.getAddress()+"\n"+a.getPos().longitude+"\n"+a.getPos().latitude);
             task.execute("http://data1500.cs.oslomet.no/~s354378/jsonupdate.php/?Id=" + a.get_id() + "&Name=" + a.getName() + "&Description=" + a.getDescription() + "&LatLng="+latlng);
 
 
@@ -74,12 +73,10 @@ public class EditAttractionActivity extends AppCompatActivity {
                     throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
                 }
                 BufferedReader br = new BufferedReader(new InputStreamReader((conn.getInputStream())));
-                System.out.println("Output from Server .... \n");
                 while ((s = br.readLine()) != null) {
                     output.append(s);
                 }
                 conn.disconnect();
-                System.out.println("The request was completed.");
                 return retur;
             } catch (Exception e) {
                 return "Noe gikk feil";
@@ -88,7 +85,7 @@ public class EditAttractionActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(String ss) {
-            System.out.println("in onPostExecute");
+
         }
     }
 }
